@@ -1,21 +1,25 @@
 package session
 
 import (
+	"MiniORM/dialect"
 	"MiniORM/log"
+	"MiniORM/schema"
 	"database/sql"
 	"strings"
 )
 
 // Session 会话
 type Session struct {
-	db      *sql.DB         // 数据库连接指针
-	sql     strings.Builder // sql语句拼接
-	sqlVars []interface{}   // 占位符拼接
+	db       *sql.DB         // 数据库连接指针
+	sql      strings.Builder // sql语句拼接
+	sqlVars  []interface{}   // 占位符拼接
+	refTable *schema.Schema
+	dialect  dialect.Dialect
 }
 
 // New 新创建一个session
-func New(db *sql.DB) *Session {
-	return &Session{db: db}
+func New(db *sql.DB, dialect dialect.Dialect) *Session {
+	return &Session{db: db, dialect: dialect}
 }
 
 // Clear 清空sql语句
