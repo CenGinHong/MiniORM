@@ -11,6 +11,9 @@ const (
 	LIMIT
 	WHERE
 	ORDERBY
+	UPDATE
+	DELETE
+	COUNT
 )
 
 type Clause struct {
@@ -38,6 +41,7 @@ func (c Clause) Build(orders ...Type) (string, []interface{}) {
 	var vars []interface{}
 	// 拼接所有子句，并且把嵌入参数返回
 	for _, order := range orders {
+		// 仅当子句存在，即ok是再进行拼接
 		if sql, ok := c.sql[order]; ok {
 			sqls = append(sqls, sql)
 			vars = append(vars, c.sqlVars[order]...)

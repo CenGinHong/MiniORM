@@ -7,8 +7,8 @@ import (
 )
 
 type User struct {
-	Name string `miniorm:"PRIMARY KEY"`
 	Age  int
+	Name string `miniorm:"PRIMARY KEY"`
 }
 
 var TestDial, _ = dialect.GetDialect("sqlite3")
