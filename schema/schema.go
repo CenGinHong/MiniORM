@@ -55,3 +55,17 @@ func Parse(dest interface{}, d dialect.Dialect) *Schema {
 	}
 	return schema
 }
+
+// RecordValues 将结构体的字段铺平，类似 (A1, A2, A3, ...)
+func (s *Schema) RecordValues(dest interface{}) []interface{} {
+	// 反射获取值
+	destValue := reflect.Indirect(reflect.ValueOf(dest))
+	// 字段域值
+	var fieldValues []interface{}
+	// 对于每一个字段的值
+	for _, field := range s.Fields {
+		// 将反射结构体的字段值取出来
+		fieldValues = append(fieldValues, destValue.FieldByName(field.Name).Interface())
+	}
+	return fieldValues
+}

@@ -10,7 +10,7 @@ import (
 
 // Model 将s的refTable进行赋值
 func (s *Session) Model(value interface{}) *Session {
-	// 反射很很耗时，如果传入的结构不变就不修改
+	// 这里的value是指针
 	if s.refTable == nil || reflect.TypeOf(value) != reflect.TypeOf(s.refTable.Model) {
 		// 解析出schema
 		s.refTable = schema.Parse(value, s.dialect)
