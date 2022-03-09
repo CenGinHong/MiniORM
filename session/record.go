@@ -12,11 +12,9 @@ import (
 func (s *Session) Insert(values ...interface{}) (int64, error) {
 	// 每一列的记录
 	recordValues := make([]interface{}, 0)
-	if len(values) > 0 {
-
-	}
 	// 对于传入的所有记录
 	for _, value := range values {
+		s.CallMethod(BeforeInsert, value)
 		// 取出表名
 		table := s.Model(value).RefTable()
 		// 生成insert子句 INSERT INTO table_name(col1, col2, col3, ...)
@@ -31,11 +29,13 @@ func (s *Session) Insert(values ...interface{}) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	s.CallMethod(BeforeInsert, nil)
 	return result.RowsAffected()
 }
 
 // Find 传入一个切片，并将查询结果置入切片
 func (s *Session) Find(values interface{}) error {
+	s.CallMethod(BeforeQuery, nil)
 	// 通过指针获取值
 	destSlice := reflect.Indirect(reflect.ValueOf(values))
 	// 获取切片单个类型的值类型，注意两种Elem的使用场景
@@ -67,6 +67,8 @@ func (s *Session) Find(values interface{}) error {
 		if err = rows.Scan(values...); err != nil {
 			return err
 		}
+		// hooks
+		s.CallMethod(AfterQuery, dest.Addr().Interface())
 		// 将结果收集
 		destSlice.Set(reflect.Append(destSlice, dest))
 	}
@@ -75,6 +77,7 @@ func (s *Session) Find(values interface{}) error {
 
 // Update 更新，可以接受map或者平铺开来的键值对
 func (s *Session) Update(kv ...interface{}) (int64, error) {
+	s.CallMethod(BeforeUpdate, nil)
 	// 强转map
 	m, ok := kv[0].(map[string]interface{})
 	// 转失败的话他可能就按k,v,k,v的形式收集
@@ -93,16 +96,19 @@ func (s *Session) Update(kv ...interface{}) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	s.CallMethod(AfterUpdate, vars)
 	return result.RowsAffected()
 }
 
 func (s *Session) Delete() (int64, error) {
+	s.CallMethod(BeforeDelete, nil)
 	s.clause.Set(clause.DELETE, s.refTable.Name)
 	sql, vars := s.clause.Build(clause.DELETE, clause.WHERE)
 	result, err := s.Raw(sql, vars...).Exec()
 	if err != nil {
 		return 0, err
 	}
+	s.CallMethod(AfterDelete, nil)
 	return result.RowsAffected()
 }
 
