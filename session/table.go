@@ -43,12 +43,10 @@ func (s *Session) CreateTable() error {
 
 // DropTable 销毁table
 func (s *Session) DropTable() error {
-	//if _, err := s.Raw(fmt.Sprintf("DROP TABLE IF EXISTS %s", s.RefTable().Name)).Exec(); err != nil {
-	//	return err
-	//}
-	//return nil
-	_, err := s.Raw(fmt.Sprintf("DROP TABLE IF EXISTS %s", s.RefTable().Name)).Exec()
-	return err
+	if _, err := s.Raw(fmt.Sprintf("DROP TABLE IF EXISTS %s", s.RefTable().Name)).Exec(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *Session) HasTable() bool {

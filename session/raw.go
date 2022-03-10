@@ -17,6 +17,24 @@ type Session struct {
 	refTable *schema.Schema
 	dialect  dialect.Dialect
 	clause   clause.Clause
+	tx       *sql.Tx
+}
+
+type CommonDB interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, arg ...interface{}) *sql.Row
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
+var _ CommonDB = (*sql.DB)(nil)
+var _ CommonDB = (*sql.Tx)(nil)
+
+// DB 如开启了事务就返回tx，否则返回DB
+func (s *Session) DB() CommonDB {
+	if s.tx != nil {
+		return s.tx
+	}
+	return s.db
 }
 
 // New 新创建一个session
@@ -29,10 +47,6 @@ func (s *Session) Clear() {
 	s.sql.Reset()
 	s.sqlVars = nil
 	s.clause = clause.Clause{}
-}
-
-func (s *Session) DB() *sql.DB {
-	return s.db
 }
 
 func (s *Session) Raw(sql string, values ...interface{}) *Session {
